@@ -7,104 +7,138 @@ import listPlugin from '@fullcalendar/list';
 import axios from 'axios';
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
 import { fetchMetadata } from 'html-metadata-parser'; // Importa la función para obtener metadatos
-import './index.css';
+import './index.css'; // Asegúrate de incluir el archivo CSS
+import { Link } from "@nextui-org/react";
 
 function App() {
-  const [events, setEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [urlPreviews, setUrlPreviews] = useState([]);
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [size, setSize] = useState('4xl');
+  // ** Estado para manejar eventos y datos del modal **
+  const [events, setEvents] = useState([]); // Almacena los eventos obtenidos de la API
+  const [selectedEvent, setSelectedEvent] = useState(null); // Almacena el evento seleccionado para el modal
+  const [urlPreviews, setUrlPreviews] = useState([]); // Almacena las vistas previas de los enlaces
+  const { isOpen, onOpen, onClose } = useDisclosure(); // Hook para manejar el estado del modal
+  const [size, setSize] = useState('xl'); // Tamaño del modal
 
+  // ** Recolección de datos de la base de datos **
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/')
+    // Realiza una solicitud GET a la API para obtener eventos
+    axios.get('http://24.144.84.64/api/')
       .then(response => {
+        // Mapea los datos de la respuesta a un formato adecuado para el calendario
         const apiEvents = response.data.map(event => ({
-          title: event.title,
-          start: event.start,
-          end: event.end,
-          description: event.description,
-          capacitador: event.capacitador,
-          materials: event.materials,
+          title: event.title, // Título del evento
+          start: event.start, // Fecha y hora de inicio
+          end: event.end, // Fecha y hora de finalización
+          description: event.description, // Descripción del evento
+          capacitador: event.capacitador, // Nombre del capacitador
+          materials: event.materials, // Materiales asociados al evento
+          className: isPastDate(event.start) ? 'past-event' : 'future-event', // Clase CSS basada en la fecha
         }));
-        setEvents(apiEvents);
+        setEvents(apiEvents); // Actualiza el estado con los eventos obtenidos
       })
       .catch(error => {
-        console.error('Error fetching events:', error);
+        console.error('Error fetching events:', error); // Maneja errores de la solicitud
       });
   }, []);
 
+  // ** Función para verificar si la fecha ha pasado o es futura **
+  const isPastDate = (date) => {
+    const now = new Date();
+    return new Date(date) < now;
+  };
+
+  // ** Maneja el scroll al abrir/cerrar el modal **
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'; // Deshabilita el scroll al abrir el modal
+    } else {
+      document.body.style.overflow = 'auto'; // Habilita el scroll al cerrar el modal
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto'; // Asegura que el scroll se reestablezca al desmontar el componente
+    };
+  }, [isOpen]);
+
+  // ** Función para manejar clics en eventos del calendario **
   const handleEventClick = (clickInfo) => {
+    // Establece el evento seleccionado en el estado
     setSelectedEvent(clickInfo.event);
     if (clickInfo.event.extendedProps.materials) {
+      // Si el evento tiene materiales, obtén las vistas previas de los enlaces
       fetchLinkPreviews(clickInfo.event.extendedProps.materials);
     }
     onOpen(); // Abre el modal cuando se hace clic en un evento
   };
 
+  // ** Función para obtener vistas previas de enlaces **
   const fetchLinkPreviews = async (materials) => {
     const previews = await Promise.all(
       materials
-        .filter(material => material.link)
+        .filter(material => material.link) // Filtra materiales que tienen enlaces
         .map(async (material) => {
           try {
+            // Obtiene metadatos del enlace
             const metadata = await fetchMetadata(material.link);
             return { ...material, metadata };
           } catch (error) {
-            console.error('Error fetching metadata for link:', material.link, error);
-            return { ...material, metadata: null };
+            console.error('Error fetching metadata for link:', material.link, error); // Maneja errores de la obtención de metadatos
+            return { ...material, metadata: null }; // Devuelve material con metadatos nulos en caso de error
           }
         })
     );
-    setUrlPreviews(previews);
+    setUrlPreviews(previews); // Actualiza el estado con las vistas previas de los enlaces
   };
 
   return (
-    <div className="App p-4">
-      <h1 className="text-2xl font-bold text-center mb-4">Calendario de Eventos</h1>
+    <div className="App">
+      <h1 className="text-2xl font-bold text-center mb-4">CALENDARIO: CHARLAS DIÁRIAS - GEOTÉCNIA MINSUR S.A.</h1>
+      <h2 className="text-3xl font-bold text-center mb-4">ÁREA DE GEOTECNIA</h2>
       <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-        initialView="dayGridMonth"
-        events={events}
-        eventClick={handleEventClick}
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]} // Plugins utilizados en el calendario
+        initialView="dayGridMonth" // Vista inicial del calendario
+        events={events} // Eventos que se mostrarán en el calendario
+        eventClick={handleEventClick} // Función que se llama al hacer clic en un evento
         headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+          left: 'prev,next today', // Botones para cambiar de mes
+          center: 'title', // Título del calendario
+          right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' // Vistas disponibles
         }}
-        locale="es"
-        height="auto"
+        locale="es" // Configura el calendario en español
+        height="auto" // Ajusta la altura del calendario automáticamente
       />
 
+      {/* ** Modal para detalles del evento ** */}
       {selectedEvent && (
         <Modal
-          size={size}
-          isOpen={isOpen}
-          onClose={onClose}
+          backdrop="blur" // Usa 'blur' para aplicar el efecto de desenfoque
+          size={size} // Tamaño del modal
+          isOpen={isOpen} // Controla si el modal está abierto o cerrado
+          onClose={onClose} // Función para cerrar el modal
+          css={{ backdropFilter: 'blur(10px)', backgroundColor: 'rgba(255, 255, 255, 0.8)' }} // Estilo CSS para el desenfoque del fondo
+          className="modal" // Añadir clase modal para el estilo
         >
           <ModalContent>
             {() => (
               <>
-                <ModalHeader className="flex flex-col gap-1">
-                  {selectedEvent.title}
+                <ModalHeader className="flex flex-col gap-1 text-center">
+                  {selectedEvent.title} {/* Título del evento */}
                 </ModalHeader>
                 <ModalBody>
-                  <p><strong>Fecha de inicio:</strong> {selectedEvent.start.toLocaleString()}</p>
-                  <p><strong>Fecha de finalización:</strong> {selectedEvent.end?.toLocaleString()}</p>
-                  <p><strong>Descripción:</strong> {selectedEvent.extendedProps.description}</p>
-                  <p><strong>Capacitador:</strong> {selectedEvent.extendedProps.capacitador}</p>
+                  <p><strong>CAPACITADOR:</strong> {selectedEvent.extendedProps.capacitador}</p>
+                  <p><strong>FECHA DE INICIO:</strong> {selectedEvent.start.toLocaleString()}</p>
+                  <p><strong>FECHA DE FINALIZACIÓN:</strong> {selectedEvent.end?.toLocaleString()}</p>
+                  <p><strong>DESCRIPCIÓN:</strong> {selectedEvent.extendedProps.description}</p>
                   {selectedEvent.extendedProps.materials && (
                     <div>
-                      <strong>Materiales:</strong>
+                      <strong>MATERIALES:</strong>
                       <ul>
                         {selectedEvent.extendedProps.materials.map((material, index) => (
                           <li key={index}>
                             {material.archivo && (
-                              <a href={material.archivo} download>{material.descripcion}</a>
+                              <a href={material.archivo} download>{material.descripcion}</a> // Enlace para descargar archivos
                             )}
                             {material.link && (
                               <div>
-                                <a href={material.link} target="_blank" rel="noopener noreferrer">{material.descripcion}</a>
                                 {urlPreviews.find(preview => preview.link === material.link)?.metadata && (
                                   <div>
                                     <h4>{urlPreviews.find(preview => preview.link === material.link)?.metadata.title}</h4>
@@ -118,6 +152,17 @@ function App() {
                                 )}
                               </div>
                             )}
+                            <div className="flex gap-2">
+                              <Link
+                                isBlock
+                                showAnchorIcon
+                                href={material.link}
+                                color="primary"
+                                target='_blank'
+                              >
+                                {material.descripcion}
+                              </Link>
+                            </div>
                           </li>
                         ))}
                       </ul>

@@ -1,3 +1,119 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* index.css */
+
+body {
+    font-family: 'Roboto', sans-serif; /* Fuente principal */
+    margin: 0; /* Elimina el margen por defecto */
+    padding: 0; /* Elimina el relleno por defecto */
+    background-image: url('fondo.jpg'); /* Reemplaza con la ruta de tu imagen */ /* Imagen de fondo */
+    background-attachment: fixed; /* Hace que el fondo permanezca fijo al hacer scroll */
+    background-size: cover; /* Asegura que la imagen cubra toda la pantalla */
+    background-position: center; /* Centra la imagen */
+    background-repeat: no-repeat; /* Evita que la imagen se repita */
+    background-clip: border-box; /* Ajusta el área de la imagen de fondo */
+    height: 100vh; /* Asegura que el body ocupe toda la altura de la ventana */
+    overflow: hidden; /* Evita el scroll vertical si no es necesario */
+}
+
+.root {
+    filter: brightness(0.9); /* Ajusta la opacidad del fondo */
+    color: white; /* Define un color de texto general */
+    transition: filter 0.5s ease-in-out; /* Transición suave para el cambio de brillo */
+}
+
+/* Estilo general para el calendario */
+.App {
+    padding: 2rem;
+    background-color: rgba(231, 248, 250, 0.819); /* Fondo blanco semitransparente */
+    border-radius: 10px; /* Bordes redondeados */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* Sombra para dar profundidad */
+    max-width: 1000px; /* Limita el ancho del contenedor */
+    margin: auto; /* Centra el contenedor */
+    animation: fadeIn 0.8s ease-in-out; /* Animación de aparición suave */
+}
+
+/* Animación de aparición */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilo para el modal */
+.modal {
+    background-color: white; /* Fondo blanco para el modal */
+    border-radius: 10px; /* Bordes redondeados */
+    padding: 0rem; /* Espaciado interno */
+    color: #333; /* Color del texto */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Sombra más suave para el modal */
+    animation: scaleIn 0.5s ease-in-out; /* Animación de escala al aparecer */
+}
+
+/* Animación de escala */
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Botones y otros elementos para resaltar */
+button, .fc-button {
+    background-color: #e3e2e2; /* Color vivo pero profesional para los botones */
+    color: white; /* Color del texto en botones */
+    border: none; /* Sin borde */
+    border-radius: 5px; /* Bordes ligeramente redondeados */
+    padding: 0.5rem 1rem; /* Espaciado interno */
+    cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+    transition: background-color 0.3s, transform 0.2s ease-in-out; /* Transición suave para el color y animación de transformación */
+}
+
+button:hover, .fc-button:hover {
+    background-color: #000000; /* Color más oscuro al pasar el ratón */
+    transform: translateY(-2px); /* Efecto de elevación al pasar el ratón */
+}
+
+/* Estilo para los enlaces */
+a {
+    color: #515050; /* Color de los enlaces */
+    text-decoration: none; /* Elimina el subrayado */
+    transition: color 0.3s, text-decoration 0.3s; /* Transición suave para color y subrayado */
+}
+
+a:hover {
+    color: #000000; /* Cambia el color del enlace al pasar el ratón */
+    text-decoration: underline; /* Subraya el enlace al pasar el ratón */
+    cursor: pointer; /* Cambia el cursor a mano al pasar sobre el enlace */
+}
+
+/* Clase para ocultar los scrollbars y evitar el movimiento de la página */
+body.no-scroll {
+    overflow: hidden; /* Oculta tanto el scrollbar vertical como el horizontal */
+}
+
+/* Estilo para eventos pasados */
+.past-event {
+    background-color: #d3d3d3; /* Color de fondo para eventos pasados */
+    border-color: #888888; /* Color del borde para eventos pasados */
+  }
+  
+  /* Estilo para eventos futuros */
+  .future-event {
+    background-color: #87ceeb; /* Color de fondo para eventos futuros */
+    border-color: #4682b4; /* Color del borde para eventos futuros */
+  }
+  
+
+  
